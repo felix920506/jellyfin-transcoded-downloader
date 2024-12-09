@@ -46,6 +46,8 @@ BaseParams = {
     'audioCodec': 'aac',
     'audioBitRate': 256000,
     'maxAudioChannels': 2,
+    'audioSampleRate': 48000,
+    'maxAudioBitDepth': 16,
     'subtitleMethod': 'Encode'
 }
 
@@ -121,7 +123,7 @@ while len(queue) > 0:
             url = f'{sessioncontroller.serverIp}/Videos/{ep['Id']}/main.m3u8?'
             params = BaseParams.copy()
             
-            filename = f'{ep['SeriesName']} {ep['SeasonName']} - {ep['Name']}.mp4'
+            filename = f'{ep['SeriesName']} {ep['SeasonName']} EP.{ep['IndexNumber']:02d} - {ep['Name']}.mp4'
             ep = sessioncontroller.get(f"Items/{ep['Id']}").json()
 
             params['videoStreamIndex'] = [s for s in ep['MediaStreams'] if s['DisplayTitle'] == video['DisplayTitle']][0]['Index']
