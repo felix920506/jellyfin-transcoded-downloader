@@ -70,56 +70,86 @@ while len(queue) > 0:
     
     elif item['Type'] == 'Season':
         eps = sessioncontroller.get("Items",{'parentId':item['Id']}).json()['Items']
-        streams = sessioncontroller.get(f"Items/{eps[0]['Id']}").json()['MediaStreams']
-        videos = []
-        audios = []
-        subs = []
-        for stream in streams:
-            match stream['Type']:
-                case 'Video':
-                    videos.append(stream)
-                case 'Audio':
-                    audios.append(stream)
-                case 'Subtitle':
-                    subs.append(stream)
-                case _:
-                    pass
         
-        video = videos[0]
-        audio = audios[0]
-        sub = None
-
-        if len(videos) > 1:
-            print('Select Video Stream:')
-            for i in range(len(videos)):
-                print(f'    {i}. {videos[i]['DisplayTitle']}')
-
-            video = input(f'Choose an item [0-{len(videos)-1}]: ')
-            video = videos[int(video)]
-        
-        if len(audios) > 1:
-            print('Select Audio Stream:')
-            for i in range(len(audios)):
-                print(f'    {i}. {audios[i]['DisplayTitle']}')
-
-            audio = input(f'Choose an item [0-{len(audios)-1}]: ')
-            audio = audios[int(audio)]
-
-        if len(subs) > 0:
-            print('Select Subtitle Stream:')
-            for i in range(len(subs)):
-                print(f'    {i}. {subs[i]['DisplayTitle']}')
-
-            sub = input(f'Choose an item, leave blank for none [0-{len(subs)-1}]: ')
-            sub = subs[int(sub)] if sub else None
-
-        print('Selected Streams:')
-        print(f'    Video: {video['DisplayTitle']}')
-        print(f'    Audio: {audio['DisplayTitle']}')
-        if sub is not None:
-            print(f'    Subtitle: {sub['DisplayTitle']}')
+        chosenVideo = None
+        chosenAudio = None
+        chosenSub = None
+        downloadList = []
 
         for ep in eps:
+            print(f"Preprocessing {ep['SeriesName']} {ep['SeasonName']} EP.{ep['IndexNumber']:02d} - {ep['Name']}")
+            ep = sessioncontroller.get(f"Items/{ep['Id']}").json()
+            streams = ep['MediaStreams']
+            videos = []
+            audios = []
+            subs = []
+            for stream in streams:
+                match stream['Type']:
+                    case 'Video':
+                        videos.append(stream)
+                    case 'Audio':
+                        audios.append(stream)
+                    case 'Subtitle':
+                        subs.append(stream)
+                    case _:
+                        pass
+            
+            video = [s for s in streams if s['DisplayTitle'] == chosenVideo]
+            audio = [s for s in streams if s['DisplayTitle'] == chosenAudio]
+            sub = [s for s in streams if s['DisplayTitle'] == chosenSub]
+
+            if video:
+                video = video[0]
+            
+            else:
+                if len(videos) > 1:
+                    print('Select Video Stream:')
+                    for i in range(len(videos)):
+                        print(f'    {i}. {videos[i]['DisplayTitle']}')
+
+                    video = input(f'Choose an item [0-{len(videos)-1}]: ')
+                    video = videos[int(video)]
+                else:
+                    video = videos[0]
+                
+                chosenVideo = video['DisplayTitle']
+            
+            if audio:
+                audio = audio[0]
+            else:
+                if len(audios) > 1:
+                    print('Select Audio Stream:')
+                    for i in range(len(audios)):
+                        print(f'    {i}. {audios[i]['DisplayTitle']}')
+
+                    audio = input(f'Choose an item [0-{len(audios)-1}]: ')
+                    audio = audios[int(audio)]
+                else:
+                    audio = audios[0]
+                
+                chosenAudio = audio['DisplayTitle']
+
+            if sub:
+                sub = sub[0]
+
+            else:
+                if len(subs) > 0:
+                    print('Select Subtitle Stream:')
+                    for i in range(len(subs)):
+                        print(f'    {i}. {subs[i]['DisplayTitle']}')
+
+                    sub = input(f'Choose an item, leave blank for none [0-{len(subs)-1}]: ')
+                    sub = subs[int(sub)] if sub else None
+
+                chosenSub = sub['DisplayTitle'] if sub is not None else None
+
+            # print('Selected Streams:')
+            # print(f'    Video: {video['DisplayTitle']}')
+            # print(f'    Audio: {audio['DisplayTitle']}')
+            # if sub is not None:
+            #     print(f'    Subtitle: {sub['DisplayTitle']}')
+
+
             url = f'{sessioncontroller.serverIp}/Videos/{ep['Id']}/main.m3u8?'
             params = BaseParams.copy()
             
@@ -134,6 +164,11 @@ while len(queue) > 0:
 
             url += urllib.parse.urlencode(params)
 
+            downloadList.append([url,filename])
+        
+        for i in downloadList:
+            url = i[0]
+            filename = i[1]
             os.system(f'ffmpeg -i "{url}" -c copy "{filename}"')
 
     elif item['Type'] == 'Movie':
