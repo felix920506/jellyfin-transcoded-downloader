@@ -12,6 +12,20 @@ PASSWORD = "password"
 if not sessioncontroller.validateCurrentSession():
     sessioncontroller.loginUsername(URL,USER,PASSWORD)
 
+# Format Selector
+print("Select Format:")
+formats = [
+    ("h264", "aac", "mp4"),
+    ("hevc", "aac", "mp4"),
+    ("av1", "opus", "webm")
+]
+
+for i in range(len(formats)):
+    print(f'    {i}. {formats[i][0]} + {formats[i][1]} in {formats[i][2]}')
+download_format = int(input(f'Choose download format [0-{len(formats)-1}]: '))
+download_format = formats[download_format]
+print(f'Chosen format: {download_format[0]} + {download_format[1]} in {download_format[2]}')
+
 # Get available Libraries
 
 ALLOWED_LIB_TYPES = ("movies", "tvshows")
@@ -37,18 +51,19 @@ COLLECTION_TYPES = ('CollectionFolder', 'Series')
 
 BaseParams = {
     'ApiKey': sessioncontroller._token,
-    'videoCodec': 'h264',
+    'videoCodec': download_format[0],
     'maxVideoBitDepth': 8,
-    'h264-deinterlace': True,
+    'deinterlace': True,
     'videoBitRate': 10000000,
     'width': 1920,
     'height': 1080,
-    'audioCodec': 'aac',
+    'audioCodec': download_format[1],
     'audioBitRate': 256000,
     'maxAudioChannels': 2,
     'audioSampleRate': 48000,
     'maxAudioBitDepth': 16,
-    'subtitleMethod': 'Encode'
+    'subtitleMethod': 'Encode',
+    'segmentContainer': 'mp4'
 }
 
 
@@ -153,7 +168,7 @@ while len(queue) > 0:
             url = f'{sessioncontroller.serverIp}/Videos/{ep['Id']}/main.m3u8?'
             params = BaseParams.copy()
             
-            filename = f'{ep['SeriesName']} {ep['SeasonName']} EP.{ep['IndexNumber']:02d} - {ep['Name']}.mp4'
+            filename = f'{ep['SeriesName']} {ep['SeasonName']} EP.{ep['IndexNumber']:02d} - {ep['Name']}.{download_format[2]}'
             ep = sessioncontroller.get(f"Items/{ep['Id']}").json()
 
             params['videoStreamIndex'] = [s for s in ep['MediaStreams'] if s['DisplayTitle'] == video['DisplayTitle']][0]['Index']
