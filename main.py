@@ -15,9 +15,9 @@ if not sessioncontroller.validateCurrentSession():
 # Format Selector
 print("Select Format:")
 formats = [
-    ("h264", "aac", "mp4"),
-    ("hevc", "aac", "mp4"),
-    ("av1", "opus", "webm")
+    ("h264", "aac", "mp4", "Best compatibility"),
+    ("hevc", "aac", "mp4", "Best Quality"),
+    ("av1", "opus", "webm", "For newer Chromebooks that can't play HEVC (playback might use more power)")
 ]
 
 for i in range(len(formats)):
