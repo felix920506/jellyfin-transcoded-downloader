@@ -6,6 +6,9 @@ import os
 URL = "example.com"
 USER = "user"
 PASSWORD = "password"
+# filter illegal chars
+ILLEGAL_CHARS = ['<', '>', ':', '"', "'", '/', '\\', '|', '?', '*']
+TRANSLATION_TABLE = str.maketrans({char: '_' for char in ILLEGAL_CHARS})
 
 # login to server
 
@@ -171,7 +174,7 @@ while len(queue) > 0:
             url = f'{sessioncontroller.serverIp}/Videos/{ep['Id']}/main.m3u8?'
             params = BaseParams.copy()
             
-            filename = f'{ep['SeriesName']} {ep['SeasonName']} EP.{ep['IndexNumber']:02d} - {ep['Name']}.{download_format[2]}'
+            filename = f'{ep['SeriesName'].translate(TRANSLATION_TABLE)} {ep['SeasonName'].translate(TRANSLATION_TABLE)} EP.{ep['IndexNumber']:02d} - {ep['Name'].translate(TRANSLATION_TABLE)}.{download_format[2]}'
             ep = sessioncontroller.get(f"Items/{ep['Id']}").json()
 
             params['videoStreamIndex'] = [s for s in ep['MediaStreams'] if s['DisplayTitle'] == video['DisplayTitle']][0]['Index']
