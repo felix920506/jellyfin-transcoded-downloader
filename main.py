@@ -155,8 +155,11 @@ while len(queue) > 0:
 
                     sub = input(f'Choose an item, leave blank for none [0-{len(subs)-1}]: ')
                     sub = subs[int(sub)] if sub else None
-
-                chosenSub = sub['DisplayTitle'] if sub is not None else None
+                
+                if sub:
+                    chosenSub = sub['DisplayTitle']
+                else:
+                    chosenSub = None
 
             # print('Selected Streams:')
             # print(f'    Video: {video['DisplayTitle']}')
@@ -173,7 +176,7 @@ while len(queue) > 0:
 
             params['videoStreamIndex'] = [s for s in ep['MediaStreams'] if s['DisplayTitle'] == video['DisplayTitle']][0]['Index']
             params['audioStreamIndex'] = [s for s in ep['MediaStreams'] if s['DisplayTitle'] == audio['DisplayTitle']][0]['Index']
-            if sub is not None:
+            if sub:
                 params['subtitleStreamIndex'] = [s for s in ep['MediaStreams'] if s['DisplayTitle'] == sub['DisplayTitle']][0]['Index']
 
 
