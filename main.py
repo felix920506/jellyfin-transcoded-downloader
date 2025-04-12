@@ -206,10 +206,6 @@ while len(queue) > 0:
             session_url = f'Items/{i['id']}/PlaybackInfo'
             session_resp = sessioncontroller.post(session_url)
             session_id = session_resp.json()['PlaySessionId']
-            sessionbody = {
-                'SessionId': session_id,
-                'ItemId': i['id']
-            }
 
             params = i['params']
             params['playSessionId'] = session_id
