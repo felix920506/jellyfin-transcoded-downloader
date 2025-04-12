@@ -211,9 +211,6 @@ while len(queue) > 0:
                 'ItemId': i['id']
             }
 
-            start_url = f'Sessions/Playing'
-            start_resp = sessioncontroller.post(start_url, rjson=sessionbody)
-
             params = i['params']
             params['playSessionId'] = session_id
             url = f'{sessioncontroller.serverIp}/Videos/{i['id']}/main.m3u8?{urllib.parse.urlencode(params)}'
