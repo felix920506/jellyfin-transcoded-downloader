@@ -105,3 +105,8 @@ def post(endpoint: str, params: dict = None, rjson: dict = None) -> requests.mod
     endpoint = endpoint.strip('/')
     return requests.post(f'{serverIp}/{endpoint}', params=params, json=rjson, headers=buildHeader(), timeout=TIMEOUT)
 
+
+def delete(endpoint: str, params: dict = None, rjson: dict = None) -> requests.models.Response:
+    endpoint = endpoint.strip('/')
+    return requests.delete(f'{serverIp}/{endpoint}', params=params, json=rjson, headers=buildHeader(), timeout=TIMEOUT)
+

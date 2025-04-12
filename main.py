@@ -95,7 +95,11 @@ while len(queue) > 0:
         downloadList = []
 
         for ep in eps:
-            print(f"Preprocessing {ep['SeriesName']} {ep['SeasonName']} EP.{ep['IndexNumber']:02d} - {ep['Name']}")
+
+            epno = ep.get('IndexNumber')
+            if epno is None:
+                epno = 0
+            print(f"Preprocessing {ep['SeriesName']} {ep['SeasonName']} EP.{epno} - {ep['Name']}")
             ep = sessioncontroller.get(f"Items/{ep['Id']}").json()
             streams = ep['MediaStreams']
             videos = []
@@ -174,7 +178,12 @@ while len(queue) > 0:
             url = f'{sessioncontroller.serverIp}/Videos/{ep['Id']}/main.m3u8?'
             params = BaseParams.copy()
             
-            filename = f'{ep['SeriesName'].translate(TRANSLATION_TABLE)} {ep['SeasonName'].translate(TRANSLATION_TABLE)} EP.{ep['IndexNumber']:02d} - {ep['Name'].translate(TRANSLATION_TABLE)}.{download_format[2]}'
+
+            # epno = ep.get('IndexNumber')
+            # if epno is None:
+            #     epno = 0
+            
+            filename = f'{ep['SeriesName'].translate(TRANSLATION_TABLE)} {ep['SeasonName'].translate(TRANSLATION_TABLE)} EP.{epno:02d} - {ep['Name'].translate(TRANSLATION_TABLE)}.{download_format[2]}'
             ep = sessioncontroller.get(f"Items/{ep['Id']}").json()
 
             params['videoStreamIndex'] = [s for s in ep['MediaStreams'] if s['DisplayTitle'] == video['DisplayTitle']][0]['Index']
@@ -185,12 +194,36 @@ while len(queue) > 0:
 
             url += urllib.parse.urlencode(params)
 
-            downloadList.append([url,filename])
+            config = {
+                'filename': filename,
+                'id': ep['Id'],
+                'params': params
+            }
+
+            downloadList.append(config)
         
         for i in downloadList:
-            url = i[0]
-            filename = i[1]
+            session_url = f'Items/{i['id']}/PlaybackInfo'
+            session_resp = sessioncontroller.post(session_url)
+            session_id = session_resp.json()['PlaySessionId']
+            sessionbody = {
+                'SessionId': session_id,
+                'ItemId': i['id']
+            }
+
+            start_url = f'Sessions/Playing'
+            start_resp = sessioncontroller.post(start_url, rjson=sessionbody)
+
+            params = i['params']
+            params['playSessionId'] = session_id
+            url = f'{sessioncontroller.serverIp}/Videos/{i['id']}/main.m3u8?{urllib.parse.urlencode(params)}'
+            filename = i['filename']
             os.system(f'ffmpeg -i "{url}" -c copy "{filename}"')
+
+
+            stop_url = f"PlayingItems/{i['id']}"
+
+            stop_resp = sessioncontroller.delete(stop_url, params={'playSessionId': session_id})
 
     elif item['Type'] == 'Movie':
         streams = sessioncontroller.get(f"Items/{item['Id']}").json()['MediaStreams']
