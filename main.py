@@ -99,10 +99,9 @@ while len(queue) > 0:
         s = input(f'Enter starting ep number [1-{len(eps)}] (Default: 1): ')
         s = 0 if not s else int(s)-1
 
-        e = len(eps)
-        if s != len(eps) - 1:
-            e = input(f'Enter ending ep number [{s+1}-{len(eps)}] (Defualt: {len(eps)}): ')
-            e = int(e) -1
+
+        e = input(f'Enter ending ep number [{s+1}-{len(eps)}] (Defualt: {len(eps)}): ')
+        e = len(eps) if not e.isnumeric() else int(e) - 1
 
         for ep in eps[s:]:
 
