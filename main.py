@@ -6,6 +6,7 @@ import os
 URL = "example.com"
 USER = "user"
 PASSWORD = "password"
+
 # filter illegal chars
 ILLEGAL_CHARS = ['<', '>', ':', '"', "'", '/', '\\', '|', '?', '*']
 TRANSLATION_TABLE = str.maketrans({char: '_' for char in ILLEGAL_CHARS})
@@ -94,7 +95,16 @@ while len(queue) > 0:
         chosenSub = None
         downloadList = []
 
-        for ep in eps:
+        print(f'Total Episodes: {len(eps)}')
+        s = input(f'Enter starting ep number [1-{len(eps)}] (Default: 1): ')
+        s = 0 if not s else int(s)-1
+
+        e = len(eps)
+        if s != len(eps) - 1:
+            e = input(f'Enter ending ep number [{s+1}-{len(eps)}] (Defualt: {len(eps)}): ')
+            e = int(e) -1
+
+        for ep in eps[s:]:
 
             epno = ep.get('IndexNumber')
             if epno is None:
