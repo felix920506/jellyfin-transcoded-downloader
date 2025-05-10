@@ -101,9 +101,9 @@ while len(queue) > 0:
 
 
         e = input(f'Enter ending ep number [{s+1}-{len(eps)}] (Defualt: {len(eps)}): ')
-        e = len(eps) if not e.isnumeric() else int(e) - 1
+        e = len(eps) if not e.isnumeric() else int(e)
 
-        for ep in eps[s:]:
+        for ep in eps[s:e]:
 
             epno = ep.get('IndexNumber')
             if epno is None:
